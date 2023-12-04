@@ -10,6 +10,8 @@ import (
 	"github.com/gogf/gf/v2/os/gctx"
 	_ "github.com/lib/pq"
 
+	"github.com/RainFallsSilent/activation-statistics/ela"
+	"github.com/RainFallsSilent/activation-statistics/esc"
 	"github.com/RainFallsSilent/activation-statistics/rpc"
 )
 
@@ -19,13 +21,14 @@ func main() {
 }
 
 func run(ctx context.Context) {
-	days := gcmd.GetArg(1, "100").Uint32()
+	days := gcmd.GetArg(1, "30").Uint32()
+	startHour := gcmd.GetArg(2, "8").Uint32() // 0-24
 	g.Log().Info(ctx, "start sync blocks from ", days, "days ago")
-	syncAndRecordActivation(ctx, days)
+	syncAndRecordActivation(ctx, days, startHour)
 	g.Log().Info(ctx, "end sync blocks")
 }
 
-func syncAndRecordActivation(ctx context.Context, days uint32) {
+func syncAndRecordActivation(ctx context.Context, days, startHour uint32) {
 	currentELAHeight, err := rpc.ELAGetCurrentBlockHeight()
 	if err != nil {
 		g.Log().Error(ctx, "get current ela height error:", err)
@@ -35,6 +38,9 @@ func syncAndRecordActivation(ctx context.Context, days uint32) {
 	g.Log().Info(ctx, "current ela height:", currentELAHeight)
 
 	// todo get ela block and transactions
+	// 2023-10-01  100
+	// 2023-10-02  200
+	// 2023-10-03  300
 	elaDailyTransactionsCount := make(map[string]int)
 	elaWeeklyTransactionsCount := make(map[string]int)
 	elaMonthlyTransactionsCount := make(map[string]int)
@@ -43,18 +49,22 @@ func syncAndRecordActivation(ctx context.Context, days uint32) {
 	elaMonthlyActiveAddressesCount := make(map[string]int)
 
 	// calculate daily\weekly\mothly ela active addresses and transactions
+	ela.Process()
 
 	// todo get esc height
 
 	// todo get esc block and transactions
+	escOneDayTransactionsCount := make(map[string]int)
 	escDailyTransactionsCount := make(map[string]int)
 	escWeeklyTransactionsCount := make(map[string]int)
 	escMonthlyTransactionsCount := make(map[string]int)
+	oneDayActiveAddressesCount := make(map[string]int)
 	escDailyActiveAddressesCount := make(map[string]int)
 	escWeeklyActiveAddressesCount := make(map[string]int)
 	escMonthlyActiveAddressesCount := make(map[string]int)
 
 	// calculate daily\weekly\mothly esc active addresses and transactions
+	esc.Process()
 
 	// print result
 	g.Log().Info(ctx, "ela daily transactions count:", elaDailyTransactionsCount)
@@ -64,12 +74,14 @@ func syncAndRecordActivation(ctx context.Context, days uint32) {
 	g.Log().Info(ctx, "ela weekly active addresses count:", elaWeeklyActiveAddressesCount)
 	g.Log().Info(ctx, "ela monthly active addresses count:", elaMonthlyActiveAddressesCount)
 
+	g.Log().Info(ctx, "esc daily transactions count:", escOneDayTransactionsCount)
 	g.Log().Info(ctx, "esc daily transactions count:", escDailyTransactionsCount)
 	g.Log().Info(ctx, "esc weekly transactions count:", escWeeklyTransactionsCount)
 	g.Log().Info(ctx, "esc monthly transactions count:", escMonthlyTransactionsCount)
 	g.Log().Info(ctx, "esc daily active addresses count:", escDailyActiveAddressesCount)
 	g.Log().Info(ctx, "esc weekly active addresses count:", escWeeklyActiveAddressesCount)
 	g.Log().Info(ctx, "esc monthly active addresses count:", escMonthlyActiveAddressesCount)
+	g.Log().Info(ctx, "one day addresses count:", oneDayActiveAddressesCount)
 
 	// open result.txt and save all count map result to file
 	resultFile, err := os.OpenFile("result.txt", os.O_RDWR|os.O_CREATE|os.O_TRUNC, 0666)
