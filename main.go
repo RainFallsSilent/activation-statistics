@@ -10,9 +10,9 @@ import (
 	"github.com/gogf/gf/v2/os/gctx"
 	_ "github.com/lib/pq"
 
+	"github.com/RainFallsSilent/activation-statistics/common"
 	"github.com/RainFallsSilent/activation-statistics/ela"
 	"github.com/RainFallsSilent/activation-statistics/esc"
-	"github.com/RainFallsSilent/activation-statistics/rpc"
 )
 
 func main() {
@@ -29,59 +29,36 @@ func run(ctx context.Context) {
 }
 
 func syncAndRecordActivation(ctx context.Context, days, startHour uint32) {
-	currentELAHeight, err := rpc.ELAGetCurrentBlockHeight()
-	if err != nil {
-		g.Log().Error(ctx, "get current ela height error:", err)
-		return
-	}
-
-	g.Log().Info(ctx, "current ela height:", currentELAHeight)
-
-	// todo get ela block and transactions
-	// 2023-10-01  100
-	// 2023-10-02  200
-	// 2023-10-03  300
-	elaDailyTransactionsCount := make(map[string]int)
-	elaWeeklyTransactionsCount := make(map[string]int)
-	elaMonthlyTransactionsCount := make(map[string]int)
-	elaDailyActiveAddressesCount := make(map[string]int)
-	elaWeeklyActiveAddressesCount := make(map[string]int)
-	elaMonthlyActiveAddressesCount := make(map[string]int)
 
 	// calculate daily\weekly\mothly ela active addresses and transactions
-	ela.Process()
-
-	// todo get esc height
-
-	// todo get esc block and transactions
-	escOneDayTransactionsCount := make(map[string]int)
-	escDailyTransactionsCount := make(map[string]int)
-	escWeeklyTransactionsCount := make(map[string]int)
-	escMonthlyTransactionsCount := make(map[string]int)
-	oneDayActiveAddressesCount := make(map[string]int)
-	escDailyActiveAddressesCount := make(map[string]int)
-	escWeeklyActiveAddressesCount := make(map[string]int)
-	escMonthlyActiveAddressesCount := make(map[string]int)
+	elaActivation := ela.Process(ctx, days, startHour)
 
 	// calculate daily\weekly\mothly esc active addresses and transactions
-	esc.Process()
+	escActivation := esc.Process(ctx, days, startHour)
 
+	// print result and store to file
+	printAndStore(ctx, elaActivation, escActivation)
+}
+
+func printAndStore(ctx context.Context, elaActivation, escActivation *common.Activation) {
 	// print result
-	g.Log().Info(ctx, "ela daily transactions count:", elaDailyTransactionsCount)
-	g.Log().Info(ctx, "ela weekly transactions count:", elaWeeklyTransactionsCount)
-	g.Log().Info(ctx, "ela monthly transactions count:", elaMonthlyTransactionsCount)
-	g.Log().Info(ctx, "ela daily active addresses count:", elaDailyActiveAddressesCount)
-	g.Log().Info(ctx, "ela weekly active addresses count:", elaWeeklyActiveAddressesCount)
-	g.Log().Info(ctx, "ela monthly active addresses count:", elaMonthlyActiveAddressesCount)
+	g.Log().Info(ctx, "ela daily transactions count:", elaActivation.OneDayTransactionsCount)
+	g.Log().Info(ctx, "ela daily transactions count:", elaActivation.DailyActiveAddressesCount)
+	g.Log().Info(ctx, "ela weekly transactions count:", elaActivation.WeeklyActiveAddressesCount)
+	g.Log().Info(ctx, "ela monthly transactions count:", elaActivation.MonthlyActiveAddressesCount)
+	g.Log().Info(ctx, "ela daily active addresses count:", elaActivation.OneDayActiveAddressesCount)
+	g.Log().Info(ctx, "ela daily active addresses count:", elaActivation.DailyActiveAddressesCount)
+	g.Log().Info(ctx, "ela weekly active addresses count:", elaActivation.WeeklyActiveAddressesCount)
+	g.Log().Info(ctx, "ela monthly active addresses count:", elaActivation.MonthlyActiveAddressesCount)
 
-	g.Log().Info(ctx, "esc daily transactions count:", escOneDayTransactionsCount)
-	g.Log().Info(ctx, "esc daily transactions count:", escDailyTransactionsCount)
-	g.Log().Info(ctx, "esc weekly transactions count:", escWeeklyTransactionsCount)
-	g.Log().Info(ctx, "esc monthly transactions count:", escMonthlyTransactionsCount)
-	g.Log().Info(ctx, "esc daily active addresses count:", escDailyActiveAddressesCount)
-	g.Log().Info(ctx, "esc weekly active addresses count:", escWeeklyActiveAddressesCount)
-	g.Log().Info(ctx, "esc monthly active addresses count:", escMonthlyActiveAddressesCount)
-	g.Log().Info(ctx, "one day addresses count:", oneDayActiveAddressesCount)
+	g.Log().Info(ctx, "esc daily transactions count:", escActivation.OneDayTransactionsCount)
+	g.Log().Info(ctx, "esc weekly transactions count:", escActivation.DailyTransactionsCount)
+	g.Log().Info(ctx, "esc weekly transactions count:", escActivation.WeeklyTransactionsCount)
+	g.Log().Info(ctx, "esc monthly transactions count:", escActivation.MonthlyTransactionsCount)
+	g.Log().Info(ctx, "esc daily active addresses count:", escActivation.OneDayActiveAddressesCount)
+	g.Log().Info(ctx, "esc weekly active addresses count:", escActivation.DailyActiveAddressesCount)
+	g.Log().Info(ctx, "esc weekly active addresses count:", escActivation.WeeklyActiveAddressesCount)
+	g.Log().Info(ctx, "esc monthly active addresses count:", escActivation.MonthlyActiveAddressesCount)
 
 	// open result.txt and save all count map result to file
 	resultFile, err := os.OpenFile("result.txt", os.O_RDWR|os.O_CREATE|os.O_TRUNC, 0666)
@@ -93,53 +70,53 @@ func syncAndRecordActivation(ctx context.Context, days, startHour uint32) {
 
 	// range map to write result to file
 	resultFile.WriteString("ela daily transactions count:\n")
-	for k, v := range elaDailyTransactionsCount {
-		resultFile.WriteString(k + ":" + strconv.Itoa(v))
+	for k, v := range elaActivation.DailyTransactionsCount {
+		resultFile.WriteString(k + ":" + strconv.Itoa(v) + "\n")
 	}
 	resultFile.WriteString("ela weekly transactions count:\n")
-	for k, v := range elaWeeklyTransactionsCount {
-		resultFile.WriteString(k + ":" + strconv.Itoa(v))
+	for k, v := range elaActivation.WeeklyTransactionsCount {
+		resultFile.WriteString(k + ":" + strconv.Itoa(v) + "\n")
 	}
 	resultFile.WriteString("ela monthly transactions count:\n")
-	for k, v := range elaMonthlyTransactionsCount {
-		resultFile.WriteString(k + ":" + strconv.Itoa(v))
+	for k, v := range elaActivation.MonthlyTransactionsCount {
+		resultFile.WriteString(k + ":" + strconv.Itoa(v) + "\n")
 	}
 	resultFile.WriteString("ela daily active addresses count:\n")
-	for k, v := range elaDailyActiveAddressesCount {
-		resultFile.WriteString(k + ":" + strconv.Itoa(v))
+	for k, v := range elaActivation.DailyActiveAddressesCount {
+		resultFile.WriteString(k + ":" + strconv.Itoa(v) + "\n")
 	}
 	resultFile.WriteString("ela weekly active addresses count:\n")
-	for k, v := range elaWeeklyActiveAddressesCount {
-		resultFile.WriteString(k + ":" + strconv.Itoa(v))
+	for k, v := range elaActivation.WeeklyActiveAddressesCount {
+		resultFile.WriteString(k + ":" + strconv.Itoa(v) + "\n")
 	}
 	resultFile.WriteString("ela monthly active addresses count:\n")
-	for k, v := range elaMonthlyActiveAddressesCount {
-		resultFile.WriteString(k + ":" + strconv.Itoa(v))
+	for k, v := range elaActivation.MonthlyActiveAddressesCount {
+		resultFile.WriteString(k + ":" + strconv.Itoa(v) + "\n")
 	}
 
 	resultFile.WriteString("esc daily transactions count:\n")
-	for k, v := range escDailyTransactionsCount {
-		resultFile.WriteString(k + ":" + strconv.Itoa(v))
+	for k, v := range escActivation.DailyTransactionsCount {
+		resultFile.WriteString(k + ":" + strconv.Itoa(v) + "\n")
 	}
 	resultFile.WriteString("esc weekly transactions count:\n")
-	for k, v := range escWeeklyTransactionsCount {
-		resultFile.WriteString(k + ":" + strconv.Itoa(v))
+	for k, v := range escActivation.WeeklyTransactionsCount {
+		resultFile.WriteString(k + ":" + strconv.Itoa(v) + "\n")
 	}
 	resultFile.WriteString("esc monthly transactions count:\n")
-	for k, v := range escMonthlyTransactionsCount {
-		resultFile.WriteString(k + ":" + strconv.Itoa(v))
+	for k, v := range escActivation.MonthlyTransactionsCount {
+		resultFile.WriteString(k + ":" + strconv.Itoa(v) + "\n")
 	}
 	resultFile.WriteString("esc daily active addresses count:\n")
-	for k, v := range escDailyActiveAddressesCount {
-		resultFile.WriteString(k + ":" + strconv.Itoa(v))
+	for k, v := range escActivation.DailyActiveAddressesCount {
+		resultFile.WriteString(k + ":" + strconv.Itoa(v) + "\n")
 	}
 	resultFile.WriteString("esc weekly active addresses count:\n")
-	for k, v := range escWeeklyActiveAddressesCount {
-		resultFile.WriteString(k + ":" + strconv.Itoa(v))
+	for k, v := range escActivation.WeeklyActiveAddressesCount {
+		resultFile.WriteString(k + ":" + strconv.Itoa(v) + "\n")
 	}
 	resultFile.WriteString("esc monthly active addresses count:\n")
-	for k, v := range escMonthlyActiveAddressesCount {
-		resultFile.WriteString(k + ":" + strconv.Itoa(v))
+	for k, v := range escActivation.MonthlyActiveAddressesCount {
+		resultFile.WriteString(k + ":" + strconv.Itoa(v) + "\n")
 	}
 
 }
