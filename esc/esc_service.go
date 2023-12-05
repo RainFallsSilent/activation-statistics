@@ -58,35 +58,32 @@ func (s *ESCService) Start() error {
 	ctx := context.Background()
 	now := time.Now()
 	todayStartTime := time.Date(now.Year(), now.Month(), now.Day(), int(s.dayStartHour), 0, 0, 0, time.UTC)
+	endDay := time.Date(now.Year(), now.Month(), now.Day()-int(s.totalDays), int(s.dayStartHour), 0, 0, 0, time.UTC)
 	ondayStartHour := time.Duration(s.dayStartHour) * time.Hour
-	g.Log("ESC").Info(ctx, "todayStartTime", todayStartTime, "stamp ", todayStartTime.Unix(), "ondayStartHour ", ondayStartHour.Seconds())
+	fmt.Println("now ", now.Unix(), "totalDaysday ", s.totalDays, "totalday unix ", int64(s.totalDays)*int64(time.Second)*3600)
+	g.Log("ESC").Info(ctx, "todayStartTime", todayStartTime, "endDay", endDay)
 	var blockInterfaces []interface{}
-	//latestBlock.Uint64()
-	_ = latestBlock
 	txCount := 0
-	for i := uint64(21986776); i > 0; i-- {
+	for i := latestBlock.Uint64(); i > 0; i-- {
 		height := big.NewInt(0).SetUint64(i)
 		block, err = s.client.BlockByNumber(ctx, height)
+		btime := time.Unix(int64(block.Time()), 0)
 		txCount = block.Transactions().Len()
 		dateStr := com.GetDateByTimeStamp(uint64(float64(block.Time()) - ondayStartHour.Seconds()))
 		days := uint32(len(s.activation.DailyTransactionsCount))
 		g.Log("ESC").Info(ctx, "detail block ", i, "timestamp ", block.Time(), "date ", dateStr, "days", days)
-		if days > s.totalDays {
+		if btime.Before(endDay) {
 			g.Log("ESC").Info(ctx, "ESC SERVICE COMPLETED")
 			break
 		}
-		btime := time.Unix(int64(block.Time()), 0)
 
 		if now.Sub(btime).Hours() < 24 {
-			if count, ok := s.activation.OneDayTransactionsCount[dateStr]; ok {
-				s.activation.OneDayTransactionsCount[dateStr] = count + txCount
+			str := todayStartTime.Format("2006-01-02 12:03:04") + "~" + todayStartTime.Add(-24*time.Hour).Format("2006-01-02 12:03:04")
+			if count, ok := s.activation.OneDayTransactionsCount[str]; ok {
+				s.activation.OneDayTransactionsCount[str] = count + txCount
 			} else {
-				s.activation.OneDayTransactionsCount[dateStr] = txCount
+				s.activation.OneDayTransactionsCount[str] = txCount
 			}
-		}
-		fmt.Println(" past hours ==", now.Sub(btime).Hours(), "past seconds ", now.Sub(btime).Seconds())
-		if days > 7 {
-			s.activation.WeeklyTransactionsCount[dateStr] = s.activation.DailyTransactionsCount[dateStr]
 		}
 		if err != nil {
 			g.Log("ESC").Fatal(ctx, "BlockByNumber failed", err)
@@ -102,7 +99,17 @@ func (s *ESCService) Start() error {
 			s.activation.DailyTransactionsCount[dateStr] = txCount
 		}
 		s.processTraceBlockInfo(blockInterfaces, dateStr)
+		s.activation.DailyActiveAddressesCount[dateStr] = s.addressMap[dateStr].Size()
 	}
+
+	w, m := com.CalculateWeeklyAndMonthlyActivationData(com.ActivationMapToSortedList(s.activation.DailyTransactionsCount))
+	s.activation.WeeklyTransactionsCount = com.ActivationListToMap(w)
+	s.activation.MonthlyTransactionsCount = com.ActivationListToMap(m)
+
+	w, m = com.CalculateWeeklyAndMonthlyActivationData(com.ActivationMapToSortedList(s.activation.DailyActiveAddressesCount))
+	s.activation.WeeklyActiveAddressesCount = com.ActivationListToMap(w)
+	s.activation.MonthlyActiveAddressesCount = com.ActivationListToMap(m)
+
 	return nil
 }
 
