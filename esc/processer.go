@@ -6,18 +6,16 @@ import (
 	"github.com/gogf/gf/v2/frame/g"
 
 	"github.com/RainFallsSilent/activation-statistics/common"
-	"github.com/RainFallsSilent/activation-statistics/rpc"
 )
 
 func Process(ctx context.Context, days, startHour uint32) *common.Activation {
-	currentELAHeight, err := rpc.ELAGetCurrentBlockHeight()
+	service, err := New(days, startHour)
 	if err != nil {
-		g.Log().Error(ctx, "get current ela height error:", err)
-		return nil
+		g.Log().Fatal(ctx, "create esc service failed", "error", err)
 	}
 
-	g.Log().Info(ctx, "current ela height:", currentELAHeight)
-
+	service.Start()
+	
 	// todo get ela block and transactions
 	// 2023-10-01  100
 	// 2023-10-02  200

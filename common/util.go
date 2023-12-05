@@ -120,3 +120,9 @@ func CalculateWeeklyAndMonthlyActivationData(dailyTransactionsCountList []Activa
 
 	return weeklyTransactionsCount, monthlyTransactionsCount
 }
+
+func GetDateByTimeStamp(timestamp uint64) string {
+	t := time.Unix(int64(timestamp), 0)
+	date := fmt.Sprintf("%04d_%02d_%02d", t.Year(), int(t.Month()), t.Day())
+	return date
+}

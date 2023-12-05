@@ -4,6 +4,7 @@ import (
 	"context"
 	"os"
 	"strconv"
+	"sync"
 
 	"github.com/gogf/gf/v2/frame/g"
 	"github.com/gogf/gf/v2/os/gcmd"
@@ -16,12 +17,15 @@ import (
 )
 
 func main() {
+	var wg sync.WaitGroup
 	ctx := gctx.New()
+	wg.Add(1)
 	run(ctx)
+	wg.Wait()
 }
 
 func run(ctx context.Context) {
-	days := gcmd.GetArg(1, "30").Uint32()
+	days := gcmd.GetArg(1, "2").Uint32()
 	startHour := gcmd.GetArg(2, "8").Uint32() // 0-24
 	g.Log().Info(ctx, "start sync blocks from ", days, "days ago")
 	syncAndRecordActivation(ctx, days, startHour)

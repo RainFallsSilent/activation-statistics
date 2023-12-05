@@ -1,4 +1,5 @@
 *.patch
+.idea/
 .idea/**/*.iml
 .idea/**/*.xml
 .idea/codeStyles

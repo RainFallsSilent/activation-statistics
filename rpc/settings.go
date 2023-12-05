@@ -12,7 +12,7 @@ var ElaRpcConfig = &common.RpcConfig{
 // ESC RPC config
 var EscRpcConfig = &common.RpcConfig{
 	HttpUrl: "https://api.elastos.io/esc",
-	User:    "",
+	User:    "http://149.248.62.252:20636",
 	Pass:    "",
 }
 
