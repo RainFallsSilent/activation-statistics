@@ -13,12 +13,12 @@ import (
 )
 
 func Process(ctx context.Context, days, startHour uint32) *common.Activation {
+	g.Log().Info(ctx, "start sync ela blocks")
 	currentELAHeight, err := rpc.ELAGetCurrentBlockHeight()
 	if err != nil {
 		g.Log().Error(ctx, "get current ela height error:", err)
 		return nil
 	}
-
 	g.Log().Info(ctx, "current ela height:", currentELAHeight)
 
 	// todo get ela block and transactions

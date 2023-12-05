@@ -33,14 +33,36 @@ func run(ctx context.Context) {
 }
 
 func syncAndRecordActivation(ctx context.Context, days, startHour uint32) {
+	var wg sync.WaitGroup
 
-	// calculate daily\weekly\mothly ela active addresses and transactions
-	elaActivation := ela.Process(ctx, days, startHour)
+	// Create channels to receive the results
+	elaActivationCh := make(chan *common.Activation)
+	escActivationCh := make(chan *common.Activation)
 
-	// calculate daily\weekly\mothly esc active addresses and transactions
-	escActivation := esc.Process(ctx, days, startHour)
+	wg.Add(2)
 
-	// print result and store to file
+	go func() {
+		defer wg.Done()
+		elaActivation := ela.Process(ctx, days, startHour)
+		elaActivationCh <- elaActivation
+	}()
+
+	go func() {
+		defer wg.Done()
+		escActivation := esc.Process(ctx, days, startHour)
+		escActivationCh <- escActivation
+	}()
+
+	go func() {
+		wg.Wait()
+		close(elaActivationCh)
+		close(escActivationCh)
+	}()
+
+	elaActivation := <-elaActivationCh
+	escActivation := <-escActivationCh
+
+	// Print result and store to file
 	printAndStore(ctx, elaActivation, escActivation)
 }
 
