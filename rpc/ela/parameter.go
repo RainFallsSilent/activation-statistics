@@ -30,6 +30,9 @@ func (param Parameter) Add(key string, value interface{}) Parameter {
 		value = strconv.FormatUint(uint64(value.(uint32)), 10)
 	case uint64:
 		value = strconv.FormatUint(value.(uint64), 10)
+	default:
+		param[key] = value
+		return param
 	}
 	param[key] = value.(string)
 	return param

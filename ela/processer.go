@@ -22,7 +22,6 @@ func Process(ctx context.Context, days, startHour uint32) *common.Activation {
 	g.Log().Info(ctx, "current ela height:", currentELAHeight)
 
 	// todo get ela block and transactions
-	// 2023-10-01  100
 	oneDayTransactionsCount := make(map[string]int)
 	dailyTransactionsCount := make(map[string]int)
 
@@ -100,6 +99,7 @@ func Process(ctx context.Context, days, startHour uint32) *common.Activation {
 	// 	dailyActiveAddressesCount[tempTime.Format("2006-01-02")] += int(rand.Intn(10))
 	// }
 
+	// calculate weekly and monthly transactions count
 	wtc, mtc := common.CalculateWeeklyAndMonthlyActivationData(common.ActivationMapToSortedList(dailyTransactionsCount))
 	weeklyTransactionsCount := common.ActivationListToMap(wtc)
 	monthlyTransactionsCount := common.ActivationListToMap(mtc)
