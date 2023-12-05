@@ -43,9 +43,9 @@ func syncAndRecordActivation(ctx context.Context, days, startHour uint32) {
 func printAndStore(ctx context.Context, elaActivation, escActivation *common.Activation) {
 	// print result
 	g.Log().Info(ctx, "ela daily transactions count:", elaActivation.OneDayTransactionsCount)
-	g.Log().Info(ctx, "ela daily transactions count:", elaActivation.DailyActiveAddressesCount)
-	g.Log().Info(ctx, "ela weekly transactions count:", elaActivation.WeeklyActiveAddressesCount)
-	g.Log().Info(ctx, "ela monthly transactions count:", elaActivation.MonthlyActiveAddressesCount)
+	g.Log().Info(ctx, "ela daily transactions count:", elaActivation.DailyTransactionsCount)
+	g.Log().Info(ctx, "ela weekly transactions count:", elaActivation.WeeklyTransactionsCount)
+	g.Log().Info(ctx, "ela monthly transactions count:", elaActivation.MonthlyTransactionsCount)
 	g.Log().Info(ctx, "ela daily active addresses count:", elaActivation.OneDayActiveAddressesCount)
 	g.Log().Info(ctx, "ela daily active addresses count:", elaActivation.DailyActiveAddressesCount)
 	g.Log().Info(ctx, "ela weekly active addresses count:", elaActivation.WeeklyActiveAddressesCount)
