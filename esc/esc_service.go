@@ -19,13 +19,13 @@ import (
 type ESCService struct {
 	client       *esc.Client
 	totalDays    uint32
-	dayStartHour uint32
+	dayStartHour int64
 
 	activation *com.Activation
 	addressMap map[string]com.SetCount // date->addressList
 }
 
-func New(days, daystartHour uint32) (*ESCService, error) {
+func New(days uint32, daystartHour int64) (*ESCService, error) {
 	c, err := esc.Dial(rpc.EscRpcConfig.HttpUrl)
 	if err != nil {
 		return nil, err
@@ -56,12 +56,10 @@ func (s *ESCService) Start() error {
 	}
 	var block *types.Block
 	ctx := context.Background()
-	now := time.Now()
-	todayStartTime := time.Date(now.Year(), now.Month(), now.Day(), int(s.dayStartHour), 0, 0, 0, time.UTC)
-	endDay := time.Date(now.Year(), now.Month(), now.Day()-int(s.totalDays), int(s.dayStartHour), 0, 0, 0, time.UTC)
-	ondayStartHour := time.Duration(s.dayStartHour) * time.Hour
-	fmt.Println("now ", now.Unix(), "totalDaysday ", s.totalDays, "totalday unix ", int64(s.totalDays)*int64(time.Second)*3600)
-	g.Log("ESC").Info(ctx, "todayStartTime", todayStartTime, "endDay", endDay)
+	runTime := time.Now()
+	before24Hour := runTime.Add(-24 * time.Hour)
+	endDay := time.Date(runTime.Year(), runTime.Month(), runTime.Day()-int(s.totalDays), int(s.dayStartHour), 0, 0, 0, time.UTC)
+	g.Log("ESC").Info(ctx, "runTime", runTime, "endDay", endDay, "totalDay", s.totalDays)
 	var blockInterfaces []interface{}
 	txCount := 0
 	for i := latestBlock.Uint64(); i > 0; i-- {
@@ -69,7 +67,8 @@ func (s *ESCService) Start() error {
 		block, err = s.client.BlockByNumber(ctx, height)
 		btime := time.Unix(int64(block.Time()), 0)
 		txCount = block.Transactions().Len()
-		dateStr := com.GetDateByTimeStamp(uint64(float64(block.Time()) - ondayStartHour.Seconds()))
+		startHour := time.Duration(-s.dayStartHour)
+		dateStr := com.GetDateByTimeStamp(btime.Add(startHour * time.Hour).Unix())
 		days := uint32(len(s.activation.DailyTransactionsCount))
 		g.Log("ESC").Info(ctx, "detail block ", i, "timestamp ", block.Time(), "date ", dateStr, "days", days)
 		if btime.Before(endDay) {
@@ -77,8 +76,8 @@ func (s *ESCService) Start() error {
 			break
 		}
 
-		if now.Sub(btime).Hours() < 24 {
-			str := todayStartTime.Format("2006-01-02 12:03:04") + "~" + todayStartTime.Add(-24*time.Hour).Format("2006-01-02 12:03:04")
+		if runTime.Sub(btime).Hours() < 24 {
+			str := before24Hour.Format("2006-01-02 15:04:05") + "~" + runTime.Format("2006-01-02 15:04:05")
 			if count, ok := s.activation.OneDayTransactionsCount[str]; ok {
 				s.activation.OneDayTransactionsCount[str] = count + txCount
 			} else {
