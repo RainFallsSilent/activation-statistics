@@ -62,9 +62,7 @@ func Process(ctx context.Context, days, startHour uint32) *common.Activation {
 						g.Log().Error(ctx, "get raw transaction error:", err)
 						continue
 					}
-					for _, output := range itx.Outputs {
-						addressesMap[output.Address] += 1
-					}
+					addressesMap[itx.Outputs[input.VOut].Address] += 1
 				}
 			}
 		}
