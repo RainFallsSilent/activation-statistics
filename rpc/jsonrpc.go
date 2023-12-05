@@ -36,6 +36,20 @@ func ELAGetBlockbyheight(height string) (*ela.ELABlockInfo, error) {
 	return &res, nil
 }
 
+func ELAGetRawTransaction(txid string) (*ela.TransactionContextInfo, error) {
+	resp, err := ela.CallAndUnmarshal("getrawtransaction", ela.Param("txid", txid).Add("verbose", true), ElaRpcConfig)
+	if err != nil {
+		return nil, err
+	}
+	var res ela.TransactionContextInfo
+	if err = ela.Unmarshal(&resp, &res); err != nil {
+		fmt.Println("Error parsing JSON:", err)
+		return nil, err
+	}
+
+	return &res, nil
+}
+
 // ESC RPC
 func ESCGetTransactionByHash(hash string) (*esc.TransactionResult, error) {
 	resp, err := esc.CallAndUnmarshal("eth_getTransactionByHash", esc.ParamList(hash), EscRpcConfig)

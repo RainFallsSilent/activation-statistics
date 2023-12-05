@@ -46,21 +46,21 @@ func syncAndRecordActivation(ctx context.Context, days, startHour uint32) {
 
 func printAndStore(ctx context.Context, elaActivation, escActivation *common.Activation) {
 	// print result
-	g.Log().Info(ctx, "ela daily transactions count:", elaActivation.OneDayTransactionsCount)
+	g.Log().Info(ctx, "ela one day transactions count:", elaActivation.OneDayTransactionsCount)
 	g.Log().Info(ctx, "ela daily transactions count:", elaActivation.DailyTransactionsCount)
 	g.Log().Info(ctx, "ela weekly transactions count:", elaActivation.WeeklyTransactionsCount)
 	g.Log().Info(ctx, "ela monthly transactions count:", elaActivation.MonthlyTransactionsCount)
-	g.Log().Info(ctx, "ela daily active addresses count:", elaActivation.OneDayActiveAddressesCount)
+	g.Log().Info(ctx, "ela one day active addresses count:", elaActivation.OneDayActiveAddressesCount)
 	g.Log().Info(ctx, "ela daily active addresses count:", elaActivation.DailyActiveAddressesCount)
 	g.Log().Info(ctx, "ela weekly active addresses count:", elaActivation.WeeklyActiveAddressesCount)
 	g.Log().Info(ctx, "ela monthly active addresses count:", elaActivation.MonthlyActiveAddressesCount)
 
-	g.Log().Info(ctx, "esc daily transactions count:", escActivation.OneDayTransactionsCount)
-	g.Log().Info(ctx, "esc weekly transactions count:", escActivation.DailyTransactionsCount)
+	g.Log().Info(ctx, "esc one day transactions count:", escActivation.OneDayTransactionsCount)
+	g.Log().Info(ctx, "esc daily transactions count:", escActivation.DailyTransactionsCount)
 	g.Log().Info(ctx, "esc weekly transactions count:", escActivation.WeeklyTransactionsCount)
 	g.Log().Info(ctx, "esc monthly transactions count:", escActivation.MonthlyTransactionsCount)
-	g.Log().Info(ctx, "esc daily active addresses count:", escActivation.OneDayActiveAddressesCount)
-	g.Log().Info(ctx, "esc weekly active addresses count:", escActivation.DailyActiveAddressesCount)
+	g.Log().Info(ctx, "esc one day active addresses count:", escActivation.OneDayActiveAddressesCount)
+	g.Log().Info(ctx, "esc daily active addresses count:", escActivation.DailyActiveAddressesCount)
 	g.Log().Info(ctx, "esc weekly active addresses count:", escActivation.WeeklyActiveAddressesCount)
 	g.Log().Info(ctx, "esc monthly active addresses count:", escActivation.MonthlyActiveAddressesCount)
 
