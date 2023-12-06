@@ -67,24 +67,24 @@ func syncAndRecordActivation(ctx context.Context, days, startHour uint32) {
 }
 
 func printAndStore(ctx context.Context, elaActivation, escActivation *common.Activation) {
-	// print result
-	g.Log().Info(ctx, "ela one day transactions count:", elaActivation.OneDayTransactionsCount)
-	g.Log().Info(ctx, "ela daily transactions count:", elaActivation.DailyTransactionsCount)
-	g.Log().Info(ctx, "ela weekly transactions count:", elaActivation.WeeklyTransactionsCount)
-	g.Log().Info(ctx, "ela monthly transactions count:", elaActivation.MonthlyTransactionsCount)
-	g.Log().Info(ctx, "ela one day active addresses count:", elaActivation.OneDayActiveAddressesCount)
-	g.Log().Info(ctx, "ela daily active addresses count:", elaActivation.DailyActiveAddressesCount)
-	g.Log().Info(ctx, "ela weekly active addresses count:", elaActivation.WeeklyActiveAddressesCount)
-	g.Log().Info(ctx, "ela monthly active addresses count:", elaActivation.MonthlyActiveAddressesCount)
+	oneDayTxCountInfo := common.ActivationMapToSortedList(elaActivation.OneDayTransactionsCount)
+	dailyTxCountInfo := common.ActivationMapToSortedList(elaActivation.DailyTransactionsCount)
+	weeklyTxCountInfo := common.ActivationMapToSortedList(elaActivation.WeeklyTransactionsCount)
+	monthlyTxCountInfo := common.ActivationMapToSortedList(elaActivation.MonthlyTransactionsCount)
+	oneDayActiveAddressesCountInfo := common.ActivationMapToSortedList(elaActivation.OneDayActiveAddressesCount)
+	dailyActiveAddressesCountInfo := common.ActivationMapToSortedList(elaActivation.DailyActiveAddressesCount)
+	weeklyActiveAddressesCountInfo := common.ActivationMapToSortedList(elaActivation.WeeklyActiveAddressesCount)
+	monthlyActiveAddressesCountInfo := common.ActivationMapToSortedList(elaActivation.MonthlyActiveAddressesCount)
 
-	g.Log().Info(ctx, "esc one day transactions count:", escActivation.OneDayTransactionsCount)
-	g.Log().Info(ctx, "esc daily transactions count:", escActivation.DailyTransactionsCount)
-	g.Log().Info(ctx, "esc weekly transactions count:", escActivation.WeeklyTransactionsCount)
-	g.Log().Info(ctx, "esc monthly transactions count:", escActivation.MonthlyTransactionsCount)
-	g.Log().Info(ctx, "esc one day active addresses count:", escActivation.OneDayActiveAddressesCount)
-	g.Log().Info(ctx, "esc daily active addresses count:", escActivation.DailyActiveAddressesCount)
-	g.Log().Info(ctx, "esc weekly active addresses count:", escActivation.WeeklyActiveAddressesCount)
-	g.Log().Info(ctx, "esc monthly active addresses count:", escActivation.MonthlyActiveAddressesCount)
+	// print result
+	g.Log().Info(ctx, "ela one day transactions count:", oneDayTxCountInfo)
+	g.Log().Info(ctx, "ela daily transactions count:", dailyTxCountInfo)
+	g.Log().Info(ctx, "ela weekly transactions count:", weeklyTxCountInfo)
+	g.Log().Info(ctx, "ela monthly transactions count:", monthlyTxCountInfo)
+	g.Log().Info(ctx, "ela one day active addresses count:", oneDayActiveAddressesCountInfo)
+	g.Log().Info(ctx, "ela daily active addresses count:", dailyActiveAddressesCountInfo)
+	g.Log().Info(ctx, "ela weekly active addresses count:", weeklyActiveAddressesCountInfo)
+	g.Log().Info(ctx, "ela monthly active addresses count:", monthlyActiveAddressesCountInfo)
 
 	// open result.txt and save all count map result to file
 	resultFile, err := os.OpenFile("result.txt", os.O_RDWR|os.O_CREATE|os.O_TRUNC, 0666)
@@ -95,54 +95,90 @@ func printAndStore(ctx context.Context, elaActivation, escActivation *common.Act
 	defer resultFile.Close()
 
 	// range map to write result to file
+	resultFile.WriteString("ela one day transactions count:\n")
+	for _, data := range oneDayTxCountInfo {
+		resultFile.WriteString(data.Date + ": " + strconv.Itoa(data.Count) + "\n")
+	}
 	resultFile.WriteString("ela daily transactions count:\n")
-	for k, v := range elaActivation.DailyTransactionsCount {
-		resultFile.WriteString(k + ":" + strconv.Itoa(v) + "\n")
+	for _, data := range dailyTxCountInfo {
+		resultFile.WriteString(data.Date + ": " + strconv.Itoa(data.Count) + "\n")
 	}
 	resultFile.WriteString("ela weekly transactions count:\n")
-	for k, v := range elaActivation.WeeklyTransactionsCount {
-		resultFile.WriteString(k + ":" + strconv.Itoa(v) + "\n")
+	for _, data := range weeklyTxCountInfo {
+		resultFile.WriteString(data.Date + ": " + strconv.Itoa(data.Count) + "\n")
 	}
 	resultFile.WriteString("ela monthly transactions count:\n")
-	for k, v := range elaActivation.MonthlyTransactionsCount {
-		resultFile.WriteString(k + ":" + strconv.Itoa(v) + "\n")
+	for _, data := range monthlyTxCountInfo {
+		resultFile.WriteString(data.Date + ": " + strconv.Itoa(data.Count) + "\n")
+	}
+	resultFile.WriteString("ela one day active addresses count:\n")
+	for _, data := range oneDayActiveAddressesCountInfo {
+		resultFile.WriteString(data.Date + ": " + strconv.Itoa(data.Count) + "\n")
 	}
 	resultFile.WriteString("ela daily active addresses count:\n")
-	for k, v := range elaActivation.DailyActiveAddressesCount {
-		resultFile.WriteString(k + ":" + strconv.Itoa(v) + "\n")
+	for _, data := range dailyActiveAddressesCountInfo {
+		resultFile.WriteString(data.Date + ": " + strconv.Itoa(data.Count) + "\n")
 	}
 	resultFile.WriteString("ela weekly active addresses count:\n")
-	for k, v := range elaActivation.WeeklyActiveAddressesCount {
-		resultFile.WriteString(k + ":" + strconv.Itoa(v) + "\n")
+	for _, data := range weeklyActiveAddressesCountInfo {
+		resultFile.WriteString(data.Date + ": " + strconv.Itoa(data.Count) + "\n")
 	}
 	resultFile.WriteString("ela monthly active addresses count:\n")
-	for k, v := range elaActivation.MonthlyActiveAddressesCount {
-		resultFile.WriteString(k + ":" + strconv.Itoa(v) + "\n")
+	for _, data := range monthlyActiveAddressesCountInfo {
+		resultFile.WriteString(data.Date + ": " + strconv.Itoa(data.Count) + "\n")
 	}
 
+	// esc
+	oneDayTxCountInfo = common.ActivationMapToSortedList(escActivation.OneDayTransactionsCount)
+	dailyTxCountInfo = common.ActivationMapToSortedList(escActivation.DailyTransactionsCount)
+	weeklyTxCountInfo = common.ActivationMapToSortedList(escActivation.WeeklyTransactionsCount)
+	monthlyTxCountInfo = common.ActivationMapToSortedList(escActivation.MonthlyTransactionsCount)
+	oneDayActiveAddressesCountInfo = common.ActivationMapToSortedList(escActivation.OneDayActiveAddressesCount)
+	dailyActiveAddressesCountInfo = common.ActivationMapToSortedList(escActivation.DailyActiveAddressesCount)
+	weeklyActiveAddressesCountInfo = common.ActivationMapToSortedList(escActivation.WeeklyActiveAddressesCount)
+	monthlyActiveAddressesCountInfo = common.ActivationMapToSortedList(escActivation.MonthlyActiveAddressesCount)
+
+	// print result
+	g.Log().Info(ctx, "esc one day transactions count:", oneDayTxCountInfo)
+	g.Log().Info(ctx, "esc daily transactions count:", dailyTxCountInfo)
+	g.Log().Info(ctx, "esc weekly transactions count:", weeklyTxCountInfo)
+	g.Log().Info(ctx, "esc monthly transactions count:", monthlyTxCountInfo)
+	g.Log().Info(ctx, "esc one day active addresses count:", oneDayActiveAddressesCountInfo)
+	g.Log().Info(ctx, "esc daily active addresses count:", dailyActiveAddressesCountInfo)
+	g.Log().Info(ctx, "esc weekly active addresses count:", weeklyActiveAddressesCountInfo)
+	g.Log().Info(ctx, "esc monthly active addresses count:", monthlyActiveAddressesCountInfo)
+
+	// range map to write result to file
+	resultFile.WriteString("esc one day transactions count:\n")
+	for _, data := range oneDayTxCountInfo {
+		resultFile.WriteString(data.Date + ": " + strconv.Itoa(data.Count) + "\n")
+	}
 	resultFile.WriteString("esc daily transactions count:\n")
-	for k, v := range escActivation.DailyTransactionsCount {
-		resultFile.WriteString(k + ":" + strconv.Itoa(v) + "\n")
+	for _, data := range dailyTxCountInfo {
+		resultFile.WriteString(data.Date + ": " + strconv.Itoa(data.Count) + "\n")
 	}
 	resultFile.WriteString("esc weekly transactions count:\n")
-	for k, v := range escActivation.WeeklyTransactionsCount {
-		resultFile.WriteString(k + ":" + strconv.Itoa(v) + "\n")
+	for _, data := range weeklyTxCountInfo {
+		resultFile.WriteString(data.Date + ": " + strconv.Itoa(data.Count) + "\n")
 	}
 	resultFile.WriteString("esc monthly transactions count:\n")
-	for k, v := range escActivation.MonthlyTransactionsCount {
-		resultFile.WriteString(k + ":" + strconv.Itoa(v) + "\n")
+	for _, data := range monthlyTxCountInfo {
+		resultFile.WriteString(data.Date + ": " + strconv.Itoa(data.Count) + "\n")
+	}
+	resultFile.WriteString("esc one day active addresses count:\n")
+	for _, data := range oneDayActiveAddressesCountInfo {
+		resultFile.WriteString(data.Date + ": " + strconv.Itoa(data.Count) + "\n")
 	}
 	resultFile.WriteString("esc daily active addresses count:\n")
-	for k, v := range escActivation.DailyActiveAddressesCount {
-		resultFile.WriteString(k + ":" + strconv.Itoa(v) + "\n")
+	for _, data := range dailyActiveAddressesCountInfo {
+		resultFile.WriteString(data.Date + ": " + strconv.Itoa(data.Count) + "\n")
 	}
 	resultFile.WriteString("esc weekly active addresses count:\n")
-	for k, v := range escActivation.WeeklyActiveAddressesCount {
-		resultFile.WriteString(k + ":" + strconv.Itoa(v) + "\n")
+	for _, data := range weeklyActiveAddressesCountInfo {
+		resultFile.WriteString(data.Date + ": " + strconv.Itoa(data.Count) + "\n")
 	}
 	resultFile.WriteString("esc monthly active addresses count:\n")
-	for k, v := range escActivation.MonthlyActiveAddressesCount {
-		resultFile.WriteString(k + ":" + strconv.Itoa(v) + "\n")
+	for _, data := range monthlyActiveAddressesCountInfo {
+		resultFile.WriteString(data.Date + ": " + strconv.Itoa(data.Count) + "\n")
 	}
-
 }
