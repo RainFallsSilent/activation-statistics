@@ -77,7 +77,7 @@ func (s *ESCService) Start() error {
 		days := uint32(len(s.activation.DailyTransactionsCount))
 		g.Log("ESC").Info(ctx, "detail block ", i, "timestamp ", block.Time(), "date ", dateStr, "days", days)
 		if btime.Before(endDay) {
-			g.Log("ESC").Info(ctx, "ESC SERVICE COMPLETED")
+
 			break
 		}
 		if txCount == 0 {
@@ -113,7 +113,11 @@ func (s *ESCService) Start() error {
 	s.activation.WeeklyTransactionsCount = com.ActivationListToMap(w)
 	s.activation.MonthlyTransactionsCount = com.ActivationListToMap(m)
 
-	w, m = com.CalculateWeeklyAndMonthlyActivationData(com.ActivationMapToSortedList(s.activation.DailyActiveAddressesCount))
+	list := make(map[string]map[string]int)
+	for key, value := range s.addressMap {
+		list[key] = value
+	}
+	w, m = com.CalculateWeeklyAndMonthlyActiveAddressData(com.ActiveAddressesMapToSortedList(list))
 	s.activation.WeeklyActiveAddressesCount = com.ActivationListToMap(w)
 	s.activation.MonthlyActiveAddressesCount = com.ActivationListToMap(m)
 
