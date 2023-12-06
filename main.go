@@ -17,11 +17,8 @@ import (
 )
 
 func main() {
-	var wg sync.WaitGroup
 	ctx := gctx.New()
-	wg.Add(1)
 	run(ctx)
-	wg.Wait()
 }
 
 func run(ctx context.Context) {
