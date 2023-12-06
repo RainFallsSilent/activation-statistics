@@ -1,9 +1,9 @@
 package common
 
-type SetCount map[string]uint64
+type SetCount map[string]int
 
 func NewSetCount() SetCount {
-	s := make(map[string]uint64)
+	s := make(map[string]int)
 	return s
 }
 
