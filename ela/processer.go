@@ -31,7 +31,7 @@ func Process(ctx context.Context, days, startHour uint32) *common.Activation {
 	currentTime := time.Now()
 	startTime := time.Date(currentTime.Year(), currentTime.Month(), currentTime.Day(), int(startHour), 0, 0, 0, time.UTC)
 	if currentTime.Hour() < int(startHour) {
-		startTime = time.Date(currentTime.Year(), currentTime.Month(), currentTime.Day()-1, int(startHour), 0, 0, 0, time.UTC)
+		startTime = startTime.Add(-24 * time.Hour)
 	}
 	dailyAddressesMap := make(map[string]map[string]int)
 	for i := currentELAHeight - 1; i > 0; i-- {
@@ -104,13 +104,6 @@ func Process(ctx context.Context, days, startHour uint32) *common.Activation {
 			break
 		}
 	}
-
-	// tempTime := time.Date(2023, 9, 1, 0, 0, 0, 0, time.UTC)
-	// for !tempTime.After(currentTime) {
-	// 	tempTime = tempTime.Add(1 * time.Hour)
-	// 	dailyTransactionsCount[tempTime.Format("2006-01-02")] += int(rand.Intn(10))
-	// 	dailyActiveAddressesCount[tempTime.Format("2006-01-02")] += int(rand.Intn(10))
-	// }
 
 	// calculate weekly and monthly transactions count
 	wtc, mtc := common.CalculateWeeklyAndMonthlyActivationData(common.ActivationMapToSortedList(dailyTransactionsCount))
