@@ -12,8 +12,10 @@ import (
 	_ "github.com/lib/pq"
 
 	"github.com/RainFallsSilent/activation-statistics/common"
+	"github.com/RainFallsSilent/activation-statistics/config"
 	"github.com/RainFallsSilent/activation-statistics/ela"
 	"github.com/RainFallsSilent/activation-statistics/esc"
+	"github.com/RainFallsSilent/activation-statistics/rpc"
 )
 
 func main() {
@@ -22,10 +24,15 @@ func main() {
 }
 
 func run(ctx context.Context) {
-	days := gcmd.GetArg(1, "2").Uint32()
-	startHour := gcmd.GetArg(2, "8").Uint32() // 0-24
-	g.Log().Info(ctx, "start sync blocks from ", days, "days ago")
-	syncAndRecordActivation(ctx, days, startHour)
+	// get config
+	path := gcmd.GetArg(1, "config.json").String()
+	cf := config.InitConfig(path)
+	rpc.ElaRpcConfig = &cf.ELARpcConfig
+	rpc.EscRpcConfig = &cf.ESCRpcConfig
+
+	// start sync blocks
+	g.Log().Info(ctx, "start sync blocks from ", cf.Days, "days ago")
+	syncAndRecordActivation(ctx, cf.Days, cf.StartHour)
 	g.Log().Info(ctx, "end sync blocks")
 }
 

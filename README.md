@@ -17,3 +17,25 @@ make all
 ```shell
 ./activation
 ```
+
+```shell
+./activation /home/config.json
+```
+
+default config.json:
+```json
+{
+	"Days":      2,
+	"StartHour": 8,
+	"ELARpcConfig": {
+		"HttpUrl": "https://api.elastos.io/ela",
+		"User":    "",
+		"Pass":    ""
+	},
+	"ESCRpcConfig": {
+		"HttpUrl": "https://api.elastos.io/esc",
+		"User":    "",
+		"Pass":    ""
+	}
+}
+```

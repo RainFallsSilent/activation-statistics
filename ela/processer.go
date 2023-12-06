@@ -13,13 +13,13 @@ import (
 )
 
 func Process(ctx context.Context, days, startHour uint32) *common.Activation {
-	g.Log().Info(ctx, "start sync ela blocks")
+	g.Log("ELA").Info(ctx, "start sync ela blocks")
 	currentELAHeight, err := rpc.ELAGetCurrentBlockHeight()
 	if err != nil {
-		g.Log().Error(ctx, "get current ela height error:", err)
+		g.Log("ELA").Error(ctx, "get current ela height error:", err)
 		return nil
 	}
-	g.Log().Info(ctx, "current ela height:", currentELAHeight)
+	g.Log("ELA").Info(ctx, "current ela height:", currentELAHeight)
 
 	// todo get ela block and transactions
 	oneDayTransactionsCount := make(map[string]int)
@@ -37,19 +37,19 @@ func Process(ctx context.Context, days, startHour uint32) *common.Activation {
 	for i := currentELAHeight - 1; i > 0; i-- {
 		block, err := rpc.ELAGetBlockbyheight(strconv.Itoa(int(i)))
 		if err != nil {
-			g.Log().Error(ctx, "get block by height error:", err)
+			g.Log("ELA").Error(ctx, "get block by height error:", err)
 			continue
 		}
 		utcTimestamp := int64(block.Time)
 		blockTime := time.Unix(utcTimestamp, 0)
-		g.Log().Info(ctx, "main chain height:", block.Height, "time:", blockTime.Format("2006-01-02 15:04:05"), "tx count:", len(block.Tx))
+		g.Log("ELA").Info(ctx, "main chain height:", block.Height, "time:", blockTime.Format("2006-01-02 15:04:05"), "tx count:", len(block.Tx))
 
 		// get active addresses
 		addressesMap := make(map[string]int)
 		for i, tx := range block.Tx {
 			var res ela.TransactionContextInfo
 			if err = ela.Unmarshal(tx, &res); err != nil {
-				g.Log().Error(ctx, "Error parsing JSON:", err)
+				g.Log("ELA").Error(ctx, "Error parsing JSON:", err)
 				continue
 			}
 			for _, output := range res.Outputs {
@@ -60,7 +60,7 @@ func Process(ctx context.Context, days, startHour uint32) *common.Activation {
 				for _, input := range res.Inputs {
 					itx, err := rpc.ELAGetRawTransaction(input.TxID)
 					if err != nil {
-						g.Log().Error(ctx, "get raw transaction error:", err)
+						g.Log("ELA").Error(ctx, "get raw transaction error:", err)
 						continue
 					}
 					addressesMap[itx.Outputs[input.VOut].Address] += 1
