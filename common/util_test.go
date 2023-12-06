@@ -41,7 +41,7 @@ func TestCalculateWeeklyAndMonthlyActivationData(t *testing.T) {
 	var dailyTransactionsCount = make(map[string]int)
 	now := time.Now()
 	for i := 0; i < 20; i++ {
-		data := time.Date(now.Year(), now.Month(), now.Day()+i, 0, 0, 0, 0, time.Local)
+		data := time.Date(now.Year(), now.Month(), now.Day()-i, 0, 0, 0, 0, time.Local)
 		dailyTransactionsCount[data.Format("2006-01-02")] = rand.Int()
 	}
 	fmt.Println(dailyTransactionsCount)
