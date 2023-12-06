@@ -65,6 +65,11 @@ func (s *ESCService) Start() error {
 	for i := latestBlock.Uint64(); i > 0; i-- {
 		height := big.NewInt(0).SetUint64(i)
 		block, err = s.client.BlockByNumber(ctx, height)
+		if err != nil {
+			i++
+			g.Log("ESC").Error(ctx, "get block error", err, "height", height)
+			continue
+		}
 		btime := time.Unix(int64(block.Time()), 0)
 		txCount = block.Transactions().Len()
 		startHour := time.Duration(-s.dayStartHour)
@@ -74,6 +79,9 @@ func (s *ESCService) Start() error {
 		if btime.Before(endDay) {
 			g.Log("ESC").Info(ctx, "ESC SERVICE COMPLETED")
 			break
+		}
+		if txCount == 0 {
+			continue
 		}
 
 		if runTime.Sub(btime).Hours() < 24 {
