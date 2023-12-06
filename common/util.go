@@ -68,13 +68,10 @@ func ActiveAddressesMapToSortedList(input map[string]map[string]int) []AddressDa
 	return result
 }
 
-func CalculateWeeklyAndMonthlyActivationData(dailyTransactionsCountList []ActivationData) (weeklyTransactionsCount, monthlyTransactionsCount []ActivationData) {
+func CalculateWeeklyAndMonthlyActivationData(currentDate time.Time, dailyTransactionsCountList []ActivationData) (weeklyTransactionsCount, monthlyTransactionsCount []ActivationData) {
 	// Initialize weeklyTransactionsCount and monthlyTransactionsCount maps
 	weeklyTransactionsCount = make([]ActivationData, 0)
 	monthlyTransactionsCount = make([]ActivationData, 0)
-
-	// Get the current date
-	currentDate := time.Now()
 
 	// Calculate weekly transactions count
 	// Start from 7 days ago
@@ -146,13 +143,10 @@ func GetDateByTimeStamp(timestamp int64) string {
 	return t.Format("2006-01-02")
 }
 
-func CalculateWeeklyAndMonthlyActiveAddressData(dailyTransactionsCountList []AddressData) (weeklyTransactionsCount, monthlyTransactionsCount []ActivationData) {
+func CalculateWeeklyAndMonthlyActiveAddressData(currentDate time.Time, dailyTransactionsCountList []AddressData) (weeklyTransactionsCount, monthlyTransactionsCount []ActivationData) {
 	// Initialize weeklyTransactionsCount and monthlyTransactionsCount maps
 	weeklyTransactionsCount = make([]ActivationData, 0)
 	monthlyTransactionsCount = make([]ActivationData, 0)
-
-	// Get the current date
-	currentDate := time.Now()
 
 	// Calculate weekly transactions count
 	// Start from 7 days ago

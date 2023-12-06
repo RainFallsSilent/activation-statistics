@@ -32,7 +32,7 @@ func TestActiveAddressesMapToSortedList(t *testing.T) {
 	data := ActiveAddressesMapToSortedList(list)
 	fmt.Println("data", data)
 
-	w, m := CalculateWeeklyAndMonthlyActiveAddressData(data)
+	w, m := CalculateWeeklyAndMonthlyActiveAddressData(time.Now(), data)
 	fmt.Println(w)
 	fmt.Println(m)
 }
@@ -41,11 +41,12 @@ func TestCalculateWeeklyAndMonthlyActivationData(t *testing.T) {
 	var dailyTransactionsCount = make(map[string]int)
 	now := time.Now()
 	for i := 0; i < 20; i++ {
-		data := time.Date(now.Year(), now.Month(), now.Day()-i, 0, 0, 0, 0, time.Local)
+		data := time.Date(now.Year(), now.Month(), now.Day()+i, 0, 0, 0, 0, time.Local)
 		dailyTransactionsCount[data.Format("2006-01-02")] = rand.Int()
 	}
 	fmt.Println(dailyTransactionsCount)
-	w, m := CalculateWeeklyAndMonthlyActivationData(ActivationMapToSortedList(dailyTransactionsCount))
+	w, m := CalculateWeeklyAndMonthlyActivationData(time.Date(now.Year(), now.Month(),
+		now.Day()+20, 0, 0, 0, 0, time.Local), ActivationMapToSortedList(dailyTransactionsCount))
 	fmt.Println(w)
 	fmt.Println(m)
 }

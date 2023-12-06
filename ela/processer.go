@@ -106,12 +106,12 @@ func Process(ctx context.Context, days, startHour uint32) *common.Activation {
 	}
 
 	// calculate weekly and monthly transactions count
-	wtc, mtc := common.CalculateWeeklyAndMonthlyActivationData(common.ActivationMapToSortedList(dailyTransactionsCount))
+	wtc, mtc := common.CalculateWeeklyAndMonthlyActivationData(currentTime, common.ActivationMapToSortedList(dailyTransactionsCount))
 	weeklyTransactionsCount := common.ActivationListToMap(wtc)
 	monthlyTransactionsCount := common.ActivationListToMap(mtc)
 
 	// calculate weekly and monthly active addresses count
-	wac, mac := common.CalculateWeeklyAndMonthlyActiveAddressData(common.ActiveAddressesMapToSortedList(dailyAddressesMap))
+	wac, mac := common.CalculateWeeklyAndMonthlyActiveAddressData(currentTime, common.ActiveAddressesMapToSortedList(dailyAddressesMap))
 	weeklyActiveAddressesCount := common.ActivationListToMap(wac)
 	monthlyActiveAddressesCount := common.ActivationListToMap(mac)
 

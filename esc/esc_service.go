@@ -109,7 +109,7 @@ func (s *ESCService) Start() error {
 		s.activation.DailyActiveAddressesCount[dateStr] = s.addressMap[dateStr].Size()
 	}
 
-	w, m := com.CalculateWeeklyAndMonthlyActivationData(com.ActivationMapToSortedList(s.activation.DailyTransactionsCount))
+	w, m := com.CalculateWeeklyAndMonthlyActivationData(runTime, com.ActivationMapToSortedList(s.activation.DailyTransactionsCount))
 	s.activation.WeeklyTransactionsCount = com.ActivationListToMap(w)
 	s.activation.MonthlyTransactionsCount = com.ActivationListToMap(m)
 
@@ -117,7 +117,7 @@ func (s *ESCService) Start() error {
 	for key, value := range s.addressMap {
 		list[key] = value
 	}
-	w, m = com.CalculateWeeklyAndMonthlyActiveAddressData(com.ActiveAddressesMapToSortedList(list))
+	w, m = com.CalculateWeeklyAndMonthlyActiveAddressData(runTime, com.ActiveAddressesMapToSortedList(list))
 	s.activation.WeeklyActiveAddressesCount = com.ActivationListToMap(w)
 	s.activation.MonthlyActiveAddressesCount = com.ActivationListToMap(m)
 
