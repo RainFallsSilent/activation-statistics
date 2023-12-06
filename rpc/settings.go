@@ -4,9 +4,9 @@ import "github.com/RainFallsSilent/activation-statistics/rpc/common"
 
 // ELA RPC config
 var ElaRpcConfig = &common.RpcConfig{
-	HttpUrl: "https://api.elastos.io/ela",
-	User:    "",
-	Pass:    "",
+	HttpUrl: "http://127.0.0.1:20336",
+	User:    "948c9e61637cce3cc318ffc00fb4a11a",
+	Pass:    "e1a12c2e46e18e5448b729460bebf6c8",
 }
 
 // ESC RPC config

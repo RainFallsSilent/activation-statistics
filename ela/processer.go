@@ -33,11 +33,12 @@ func Process(ctx context.Context, days, startHour uint32) *common.Activation {
 	if currentTime.Hour() < int(startHour) {
 		startTime = time.Date(currentTime.Year(), currentTime.Month(), currentTime.Day()-1, int(startHour), 0, 0, 0, time.UTC)
 	}
+	dailyAddressesMap := make(map[string]map[string]int)
 	for i := currentELAHeight - 1; i > 0; i-- {
 		block, err := rpc.ELAGetBlockbyheight(strconv.Itoa(int(i)))
 		if err != nil {
 			g.Log().Error(ctx, "get block by height error:", err)
-			return nil
+			continue
 		}
 		utcTimestamp := int64(block.Time)
 		blockTime := time.Unix(utcTimestamp, 0)
@@ -72,17 +73,31 @@ func Process(ctx context.Context, days, startHour uint32) *common.Activation {
 			oneDayKey := currentTime.Format("2006-01-02 12:03:04") + "~" + currentTime.Add(-24*time.Hour).Format("2006-01-02 12:03:04")
 			oneDayTransactionsCount[oneDayKey] += len(block.Tx)
 			oneDayAddressesCount[oneDayKey] += len(addressesMap)
-		} else {
-			g.Log().Info(ctx, "current time after block time add 1 day")
 		}
 
 		// record daily transactions and active addreses count
 		if blockTime.Hour() >= int(startHour) {
 			dailyTransactionsCount[blockTime.Format("2006-01-02")] += len(block.Tx)
 			dailyActiveAddressesCount[blockTime.Format("2006-01-02")] += len(addressesMap)
+
+			// record detailed daily addresses information
+			if _, ok := dailyAddressesMap[blockTime.Format("2006-01-02")]; !ok {
+				dailyAddressesMap[blockTime.Format("2006-01-02")] = make(map[string]int)
+			}
+			for k, v := range addressesMap {
+				dailyAddressesMap[blockTime.Format("2006-01-02")][k] += v
+			}
 		} else {
 			dailyTransactionsCount[blockTime.Add(-24*time.Hour).Format("2006-01-02")] += len(block.Tx)
 			dailyActiveAddressesCount[blockTime.Add(-24*time.Hour).Format("2006-01-02")] += len(addressesMap)
+
+			// record detailed daily addresses information
+			if _, ok := dailyAddressesMap[blockTime.Add(-24*time.Hour).Format("2006-01-02")]; !ok {
+				dailyAddressesMap[blockTime.Add(-24*time.Hour).Format("2006-01-02")] = make(map[string]int)
+			}
+			for k, v := range addressesMap {
+				dailyAddressesMap[blockTime.Add(-24*time.Hour).Format("2006-01-02")][k] += v
+			}
 		}
 
 		if startTime.After(blockTime.Add(time.Duration(days) * 24 * time.Hour)) {
@@ -103,7 +118,7 @@ func Process(ctx context.Context, days, startHour uint32) *common.Activation {
 	monthlyTransactionsCount := common.ActivationListToMap(mtc)
 
 	// calculate weekly and monthly active addresses count
-	wac, mac := common.CalculateWeeklyAndMonthlyActivationData(common.ActivationMapToSortedList(dailyActiveAddressesCount))
+	wac, mac := common.CalculateWeeklyAndMonthlyActiveAddressData(common.ActiveAddressesMapToSortedList(dailyAddressesMap))
 	weeklyActiveAddressesCount := common.ActivationListToMap(wac)
 	monthlyActiveAddressesCount := common.ActivationListToMap(mac)
 
