@@ -78,7 +78,6 @@ func Process(ctx context.Context, days, startHour uint32) *common.Activation {
 		// record daily transactions and active addreses count
 		if blockTime.Hour() >= int(startHour) {
 			dailyTransactionsCount[blockTime.Format("2006-01-02")] += len(block.Tx)
-			dailyActiveAddressesCount[blockTime.Format("2006-01-02")] += len(addressesMap)
 
 			// record detailed daily addresses information
 			if _, ok := dailyAddressesMap[blockTime.Format("2006-01-02")]; !ok {
@@ -89,7 +88,6 @@ func Process(ctx context.Context, days, startHour uint32) *common.Activation {
 			}
 		} else {
 			dailyTransactionsCount[blockTime.Add(-24*time.Hour).Format("2006-01-02")] += len(block.Tx)
-			dailyActiveAddressesCount[blockTime.Add(-24*time.Hour).Format("2006-01-02")] += len(addressesMap)
 
 			// record detailed daily addresses information
 			if _, ok := dailyAddressesMap[blockTime.Add(-24*time.Hour).Format("2006-01-02")]; !ok {
@@ -103,6 +101,9 @@ func Process(ctx context.Context, days, startHour uint32) *common.Activation {
 		if startTime.After(blockTime.Add(time.Duration(days) * 24 * time.Hour)) {
 			break
 		}
+	}
+	for k, v := range dailyAddressesMap {
+		dailyActiveAddressesCount[k] = len(v)
 	}
 
 	// calculate weekly and monthly transactions count

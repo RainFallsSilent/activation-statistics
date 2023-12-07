@@ -16,6 +16,7 @@ func TestActiveAddressesMapToSortedList(t *testing.T) {
 	addressMap["2023-12-02"] = NewSetCount()
 	addressMap["2023-12-01"] = NewSetCount()
 	addressMap["2023-11-30"] = NewSetCount()
+	addressMap["2023-11-29"] = NewSetCount()
 
 	address := [4]string{"0xbeeaab15628329c2c89bc9f403d34b31fbcb3085", "0x9d5641fc60fa00af9406528d1f41f45c86babb72", "0xbeeaab15628329c2c89bc9f403d34b31fbcb3085", "0x024f5e84cd663c3150552ad6087be59a385468f6"}
 	for _, item := range addressMap {
