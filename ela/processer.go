@@ -57,13 +57,18 @@ func Process(ctx context.Context, days, startHour uint32) *common.Activation {
 			}
 
 			if i != 0 {
-				for _, input := range res.Inputs {
+				g.Log().Info(ctx, "inputs count:", len(res.Inputs))
+				for i, input := range res.Inputs {
 					itx, err := rpc.ELAGetRawTransaction(input.TxID)
 					if err != nil {
 						g.Log("ELA").Error(ctx, "get raw transaction error:", err)
 						continue
 					}
 					addressesMap[itx.Outputs[input.VOut].Address] += 1
+					if i > 10 {
+						// we think the inputs from same address
+						break
+					}
 				}
 			}
 		}
