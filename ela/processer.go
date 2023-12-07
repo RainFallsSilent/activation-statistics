@@ -70,7 +70,7 @@ func Process(ctx context.Context, days, startHour uint32) *common.Activation {
 
 		// record daily transactions and active addresses count
 		if !currentTime.After(blockTime.Add(24 * time.Hour)) {
-			oneDayKey := currentTime.Format("2006-01-02 12:03:04") + "~" + currentTime.Add(-24*time.Hour).Format("2006-01-02 12:03:04")
+			oneDayKey := currentTime.Format("2006-01-02 15:04:05") + "~" + currentTime.Add(-24*time.Hour).Format("2006-01-02 15:04:05")
 			oneDayTransactionsCount[oneDayKey] += len(block.Tx)
 			oneDayAddressesCount[oneDayKey] += len(addressesMap)
 		}
